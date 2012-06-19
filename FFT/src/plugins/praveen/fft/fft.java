@@ -329,9 +329,6 @@ public class fft extends EzPlug {
 								resultArray.setDataAsDouble(x, y, 1, Math.atan2(fArray[(x + y * _w)*2 + 1], fArray[(x + y * _w)*2 + 0]));
 							}
 						}
-
-						//fImage.setChannelName(0, "Magnitude");
-						//fImage.setChannelName(1, "Phase");
 					}
 					else // Real/Imaginary Pair
 					{
