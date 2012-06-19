@@ -331,12 +331,15 @@ public class fft extends EzPlug {
 
 			for(int k = 0; k < _z; k++)
 			{
-				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
-
-				resultArray.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));
-				double[] fArray = resultArray.getDataCopyCXYAsDouble();
-				fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
+				double[] fArray = new double[_w*_h*2];
+				Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), 0, fArray, 0, _w*_h, sequence.isSignedDataType());
 				
+				// Computes 2D forward DFT of real data leaving the result in fArray
+				// Because the result is stored in fArray, fArray must be of size rows*2*columns,
+				// with only the first rows*columns elements filled with real data.
+				fft.realForwardFull(fArray);
+
+				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
 				double[][] resultData = resultArray.getDataXYCAsDouble();
 				
 				if(display=="Magnitude/Phase Pair")
@@ -362,17 +365,20 @@ public class fft extends EzPlug {
 				resultArray.dataChanged();
 				fSequence.setImage(0, k, resultArray);
 			}
-
 		}
 		else
 		{ //Swap quadrants
 			for(int k = 0; k < _z; k++)
 			{
-				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
+				double[] fArray = new double[_w*_h*2];
+				Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), 0, fArray, 0, _w*_h, sequence.isSignedDataType());
+				
+				// Computes 2D forward DFT of real data leaving the result in fArray
+				// Because the result is stored in fArray, fArray must be of size rows*2*columns,
+				// with only the first rows*columns elements filled with real data.
+				fft.realForwardFull(fArray);
 
-				resultArray.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));
-				double[] fArray = resultArray.getDataCopyCXYAsDouble();
-				fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
+				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
 				resultArray.beginUpdate();
 				try
 				{
