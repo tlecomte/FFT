@@ -52,6 +52,17 @@ public class fft extends EzPlug {
 		Sequence fSequence = new Sequence();
 		fSequence.setName("Fourier Transform 3D");
 
+		if(display=="Magnitude/Phase Pair")
+		{
+			fSequence.setChannelName(0, "Magnitude");
+			fSequence.setChannelName(1, "Phase");
+		}
+		else // Real/Imaginary Pair
+		{
+			fSequence.setChannelName(0, "Real");
+			fSequence.setChannelName(1, "Imaginary");
+		}
+
 		if(swap == "No")
 		{ //No Quadrant swapping. Leave as it is.
 			for(int k = 0; k < _z; k++)
