@@ -334,17 +334,17 @@ public class fft extends EzPlug {
 						//fImage.setChannelName(1, "Phase");
 					}
 					else // Real/Imaginary Pair
-					{	fSequence.setChannelName(0, "Real");
-					fSequence.setChannelName(1, "Imaginary");
-					for(int x = 0; x < _w; x++)
 					{
-						for(int y = 0; y < _h; y++)
+						fSequence.setChannelName(0, "Real");
+						fSequence.setChannelName(1, "Imaginary");
+						for(int x = 0; x < _w; x++)
 						{
-							resultArray.setDataAsDouble(x, y, 0, fArray[(x + y * _w)*2 + 0]);
-							resultArray.setDataAsDouble(x, y, 1, fArray[(x + y * _w)*2 + 1]);
+							for(int y = 0; y < _h; y++)
+							{
+								resultArray.setDataAsDouble(x, y, 0, fArray[(x + y * _w)*2 + 0]);
+								resultArray.setDataAsDouble(x, y, 1, fArray[(x + y * _w)*2 + 1]);
+							}
 						}
-					}
-
 					}
 
 				}finally{
