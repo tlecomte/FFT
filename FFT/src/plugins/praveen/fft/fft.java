@@ -336,36 +336,30 @@ public class fft extends EzPlug {
 				resultArray.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));
 				double[] fArray = resultArray.getDataCopyCXYAsDouble();
 				fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
-				resultArray.beginUpdate();
-				try
+				
+				double[][] resultData = resultArray.getDataXYCAsDouble();
+				
+				if(display=="Magnitude/Phase Pair")
 				{
-					if(display=="Magnitude/Phase Pair")
+					for (int i = 0; i < fArray.length/2; i++)
 					{
-						for(int x = 0; x < _w; x++)
-						{
-							for(int y = 0; y < _h; y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[(x + y * _w)*2 + 0], 2) + Math.pow(fArray[(x + y * _w)*2 + 1], 2)));
-								resultArray.setDataAsDouble(x, y, 1, Math.atan2(fArray[(x + y * _w)*2 + 1], fArray[(x + y * _w)*2 + 0]));
-							}
-						}
+						double real = fArray[2*i];
+						double imag = fArray[2*i + 1];
+						
+						resultData[0][i] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+						resultData[1][i] = Math.atan2(imag, real);
 					}
-					else // Real/Imaginary Pair
+				}
+				else // Real/Imaginary Pair
+				{
+					for (int i = 0; i < fArray.length/2; i++)
 					{
-						for(int x = 0; x < _w; x++)
-						{
-							for(int y = 0; y < _h; y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, fArray[(x + y * _w)*2 + 0]);
-								resultArray.setDataAsDouble(x, y, 1, fArray[(x + y * _w)*2 + 1]);
-							}
-						}
+						resultData[0][i] = fArray[2*i];
+						resultData[1][i] = fArray[2*i + 1];
 					}
-
-				}finally{
-					resultArray.endUpdate();
 				}
 
+				resultArray.dataChanged();
 				fSequence.setImage(0, k, resultArray);
 			}
 
