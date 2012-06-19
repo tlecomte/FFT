@@ -326,22 +326,22 @@ public class fft extends EzPlug {
 		}
 
 		final DoubleFFT_2D fft = new DoubleFFT_2D(_h, _w);
-		if(swap == "No")
-		{ //No Quadrant swapping
 
-			for(int k = 0; k < _z; k++)
+		for(int k = 0; k < _z; k++)
+		{
+			double[] fArray = new double[_w*_h*2];
+			Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), 0, fArray, 0, _w*_h, sequence.isSignedDataType());
+			
+			// Computes 2D forward DFT of real data leaving the result in fArray
+			// Because the result is stored in fArray, fArray must be of size rows*2*columns,
+			// with only the first rows*columns elements filled with real data.
+			fft.realForwardFull(fArray);
+
+			IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
+			double[][] resultData = resultArray.getDataXYCAsDouble();
+			
+			if(swap == "No") //No Quadrant swapping
 			{
-				double[] fArray = new double[_w*_h*2];
-				Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), 0, fArray, 0, _w*_h, sequence.isSignedDataType());
-				
-				// Computes 2D forward DFT of real data leaving the result in fArray
-				// Because the result is stored in fArray, fArray must be of size rows*2*columns,
-				// with only the first rows*columns elements filled with real data.
-				fft.realForwardFull(fArray);
-
-				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
-				double[][] resultData = resultArray.getDataXYCAsDouble();
-				
 				if(display=="Magnitude/Phase Pair")
 				{
 					for (int i = 0; i < fArray.length/2; i++)
@@ -361,26 +361,9 @@ public class fft extends EzPlug {
 						resultData[1][i] = fArray[2*i + 1];
 					}
 				}
-
-				resultArray.dataChanged();
-				fSequence.setImage(0, k, resultArray);
 			}
-		}
-		else
-		{ //Swap quadrants
-			for(int k = 0; k < _z; k++)
+			else //Swap quadrants
 			{
-				double[] fArray = new double[_w*_h*2];
-				Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), 0, fArray, 0, _w*_h, sequence.isSignedDataType());
-				
-				// Computes 2D forward DFT of real data leaving the result in fArray
-				// Because the result is stored in fArray, fArray must be of size rows*2*columns,
-				// with only the first rows*columns elements filled with real data.
-				fft.realForwardFull(fArray);
-
-				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
-				double[][] resultData = resultArray.getDataXYCAsDouble();
-				
 				if(display=="Magnitude/Phase Pair")
 				{
 					for(int x = 0; x < (wc+1); x++)
@@ -452,10 +435,10 @@ public class fft extends EzPlug {
 						}
 					}						
 				}
-
-				resultArray.dataChanged();
-				fSequence.setImage(0, k, resultArray);
 			}
+
+			resultArray.dataChanged();
+			fSequence.setImage(0, k, resultArray);
 		}
 
 		addSequence(fSequence);
