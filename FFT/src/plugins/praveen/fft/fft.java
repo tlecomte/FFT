@@ -302,6 +302,17 @@ public class fft extends EzPlug {
 		int _z = sequence.getSizeZ();
 		int wc = (int) Math.ceil(_w/2);
 		int hc = (int) Math.ceil(_h/2);
+		
+		if(display=="Magnitude/Phase Pair")
+		{
+			fSequence.setChannelName(0, "Magnitude");
+			fSequence.setChannelName(1, "Phase");
+		}
+		else // Real/Imaginary Pair
+		{
+			fSequence.setChannelName(0, "Real");
+			fSequence.setChannelName(1, "Imaginary");
+		}
 
 		final DoubleFFT_2D fft = new DoubleFFT_2D(_h, _w);
 		if(swap == "No")
@@ -319,8 +330,6 @@ public class fft extends EzPlug {
 				{
 					if(display=="Magnitude/Phase Pair")
 					{
-						fSequence.setChannelName(0, "Magnitude");
-						fSequence.setChannelName(1, "Phase");
 						for(int x = 0; x < _w; x++)
 						{
 							for(int y = 0; y < _h; y++)
@@ -332,8 +341,6 @@ public class fft extends EzPlug {
 					}
 					else // Real/Imaginary Pair
 					{
-						fSequence.setChannelName(0, "Real");
-						fSequence.setChannelName(1, "Imaginary");
 						for(int x = 0; x < _w; x++)
 						{
 							for(int y = 0; y < _h; y++)
@@ -366,9 +373,6 @@ public class fft extends EzPlug {
 				{
 					if(display=="Magnitude/Phase Pair")
 					{
-						fSequence.setChannelName(0, "Magnitude");
-						fSequence.setChannelName(1, "Phase");
-
 						for(int x = 0; x < (wc+1); x++)
 						{
 							for(int y = 0; y < (hc+1); y++)
@@ -399,8 +403,6 @@ public class fft extends EzPlug {
 					}					
 					else //Real/Imaginary Pair
 					{
-						fSequence.setChannelName(0, "Real");
-						fSequence.setChannelName(1, "Imaginary");
 						for(int x = 0; x < (wc+1); x++)
 						{
 							for(int y = 0; y < (hc+1); y++)
