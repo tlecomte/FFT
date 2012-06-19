@@ -303,6 +303,101 @@ public class fft extends EzPlug {
 		addSequence(fSequence);
 		return fSequence;
 	}
+	
+	interface ApplyFunction {
+		double apply0(double real, double imag);
+		double apply1(double real, double imag);
+	}
+	
+	ApplyFunction realImageApplyFunction = new ApplyFunction()
+	{
+		public double apply0(double real, double imag)
+		{
+			return real;
+		}
+		public double apply1(double real, double imag)
+		{
+			return imag;
+		}
+	};
+	
+	ApplyFunction magnitudeAngleApplyFunction = new ApplyFunction()
+	{
+		public double apply0(double real, double imag)
+		{
+			return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+		}
+		public double apply1(double real, double imag)
+		{
+			return Math.atan2(imag, real);
+		}
+	};
+	
+	interface AssignFunction {
+		void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function);
+	}
+	
+	AssignFunction directAssign = new AssignFunction()
+	{
+		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function) {
+			for (int i = 0; i < in.length/2; i++)
+			{
+				double real = in[2*i];
+				double imag = in[2*i + 1];
+				
+				out[0][i] = function.apply0(real, imag);
+				out[1][i] = function.apply1(real, imag);
+			}	
+		}	
+	};
+	
+	AssignFunction swapAssign = new AssignFunction() {
+		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function)
+		{
+			int wc = (int) Math.ceil(_w/2);
+			int hc = (int) Math.ceil(_h/2);
+			
+			for(int x = 0; x < (wc+1); x++)
+			{
+				for(int y = 0; y < (hc+1); y++)
+				{
+					double real = in[((wc-x) + (hc-y) * _w)*2 + 0];
+					double imag = in[((wc-x) + (hc-y) * _w)*2 + 1];
+					
+					out[0][x + _w*y] = function.apply0(real, imag);
+					out[1][x + _w*y] = function.apply1(real, imag);
+				}
+				for(int y = hc+1; y < _h; y++)
+				{
+					double real = in[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
+					double imag = in[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
+					
+					out[0][x + _w*y] = function.apply0(real, imag);
+					out[1][x + _w*y] = function.apply1(real, imag);
+				}
+		
+			}
+			for(int x = (wc+1); x < _w; x++)
+			{
+				for(int y = 0; y < (hc+1); y++)
+				{
+					double real = in[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
+					double imag = in[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
+					
+					out[0][x + _w*y] = function.apply0(real, imag);
+					out[1][x + _w*y] = function.apply1(real, imag);
+				}
+				for(int y = hc+1; y < _h; y++)
+				{
+					double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
+					double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
+					
+					out[0][x + _w*y] = function.apply0(real, imag);
+					out[1][x + _w*y] = function.apply1(real, imag);
+				}
+			}
+		}
+	};
 
 	private Sequence FFT_2D(Sequence sequence, String swap, String display) 
 	{
@@ -311,8 +406,6 @@ public class fft extends EzPlug {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
 		int _z = sequence.getSizeZ();
-		int wc = (int) Math.ceil(_w/2);
-		int hc = (int) Math.ceil(_h/2);
 		
 		if(display=="Magnitude/Phase Pair")
 		{
@@ -340,102 +433,28 @@ public class fft extends EzPlug {
 			IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
 			double[][] resultData = resultArray.getDataXYCAsDouble();
 			
+			ApplyFunction applyFunction = null;
+			if(display=="Magnitude/Phase Pair")
+			{
+				applyFunction = magnitudeAngleApplyFunction;
+			}
+			else // Real/Imaginary Pair
+			{
+				applyFunction = realImageApplyFunction;
+			}
+			
+			
+			AssignFunction assignFunction = null;
 			if(swap == "No") //No Quadrant swapping
 			{
-				if(display=="Magnitude/Phase Pair")
-				{
-					for (int i = 0; i < fArray.length/2; i++)
-					{
-						double real = fArray[2*i];
-						double imag = fArray[2*i + 1];
-						
-						resultData[0][i] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-						resultData[1][i] = Math.atan2(imag, real);
-					}
-				}
-				else // Real/Imaginary Pair
-				{
-					for (int i = 0; i < fArray.length/2; i++)
-					{
-						resultData[0][i] = fArray[2*i];
-						resultData[1][i] = fArray[2*i + 1];
-					}
-				}
+				assignFunction = directAssign;
 			}
 			else //Swap quadrants
 			{
-				if(display=="Magnitude/Phase Pair")
-				{
-					for(int x = 0; x < (wc+1); x++)
-					{
-						for(int y = 0; y < (hc+1); y++)
-						{
-							double real = fArray[((wc-x) + (hc-y) * _w)*2 + 0];
-							double imag = fArray[((wc-x) + (hc-y) * _w)*2 + 1];
-							
-							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-							resultData[1][x + _w*y] = Math.atan2(imag, real);
-						}
-						for(int y = hc+1; y < _h; y++)
-						{
-							double real = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
-							double imag = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
-							
-							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-							resultData[1][x + _w*y] = Math.atan2(imag, real);
-						}
-
-					}
-					for(int x = (wc+1); x < _w; x++)
-					{
-						for(int y = 0; y < (hc+1); y++)
-						{
-							double real = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
-							double imag = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
-							
-							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-							resultData[1][x + _w*y] = Math.atan2(imag, real);
-						}
-						for(int y = hc+1; y < _h; y++)
-						{
-							double real = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
-							double imag = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
-							
-							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-							resultData[1][x + _w*y] = Math.atan2(imag, real);
-						}
-					}
-				}					
-				else //Real/Imaginary Pair
-				{
-					for(int x = 0; x < (wc+1); x++)
-					{
-						for(int y = 0; y < (hc+1); y++)
-						{
-							resultData[0][x + _w*y] = fArray[((wc-x) + (hc-y) * _w)*2 + 0];
-							resultData[1][x + _w*y] = fArray[((wc-x) + (hc-y) * _w)*2 + 1];
-						}
-						for(int y = hc+1; y < _h; y++)
-						{
-							resultData[0][x + _w*y] = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
-							resultData[1][x + _w*y] = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
-						}
-					}
-					for(int x = (wc+1); x < _w; x++)
-					{
-						for(int y = 0; y < (hc+1); y++)
-						{
-							resultData[0][x + _w*y] = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
-							resultData[1][x + _w*y] = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
-						}
-						for(int y = hc+1; y < _h; y++)
-						{
-							resultData[0][x + _w*y] = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
-							resultData[1][x + _w*y] = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
-						}
-					}						
-				}
+				assignFunction = swapAssign;
 			}
+			
+			assignFunction.assign(fArray, resultData, _w, _h, applyFunction);
 
 			resultArray.dataChanged();
 			fSequence.setImage(0, k, resultArray);
