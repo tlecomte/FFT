@@ -63,17 +63,17 @@ public class fft extends EzPlug {
 			fSequence.setChannelName(1, "Imaginary");
 		}
 
+		for(int k = 0; k < _z; k++)
+		{	
+			IcyBufferedImage resultMatrix = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);			
+			resultMatrix.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));//set buffered image to sequence 
+			fSequence.setImage(0, k, resultMatrix);			
+		}						
+		fArray = fSequence.getDataCopyCXYZAsDouble(0);
+		fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
+		
 		if(swap == "No")
 		{ //No Quadrant swapping. Leave as it is.
-			for(int k = 0; k < _z; k++)
-			{	
-				IcyBufferedImage resultMatrix = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);			
-				resultMatrix.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));//set buffered image to sequence 
-				fSequence.setImage(0, k, resultMatrix);			
-			}						
-			fArray = fSequence.getDataCopyCXYZAsDouble(0);
-			fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
-
 			if(display=="Magnitude/Phase Pair")
 			{
 				for(int k = 0; k < _z; k++)
@@ -125,15 +125,6 @@ public class fft extends EzPlug {
 		}
 		else
 		{//Swap Quadrants
-			for(int k = 0; k < _z; k++)
-			{	
-				IcyBufferedImage resultMatrix = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);			
-				resultMatrix.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));//set buffered image to sequence 
-				fSequence.setImage(0, k, resultMatrix);			
-			}						
-			fArray = fSequence.getDataCopyCXYZAsDouble(0);
-			fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
-
 			if(display=="Magnitude/Phase Pair")
 			{
 				for(int k = 0; k < zc+1; k++)
