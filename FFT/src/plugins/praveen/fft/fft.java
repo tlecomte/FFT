@@ -379,80 +379,84 @@ public class fft extends EzPlug {
 				fft.realForwardFull(fArray);
 
 				IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
-				resultArray.beginUpdate();
-				try
+				double[][] resultData = resultArray.getDataXYCAsDouble();
+				
+				if(display=="Magnitude/Phase Pair")
 				{
-					if(display=="Magnitude/Phase Pair")
+					for(int x = 0; x < (wc+1); x++)
 					{
-						for(int x = 0; x < (wc+1); x++)
+						for(int y = 0; y < (hc+1); y++)
 						{
-							for(int y = 0; y < (hc+1); y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((wc-x) + (hc-y) * _w)*2 + 0], 2)+Math.pow(fArray[((wc-x) + (hc-y) * _w)*2 + 1], 2)));
-								resultArray.setDataAsDouble(x, y, 1, Math.atan2(fArray[((wc-x) + (hc-y) * _w)*2 + 1], fArray[((wc-x) + (hc-y) * _w)*2 + 0]));
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0], 2)+Math.pow(fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1], 2)));
-								resultArray.setDataAsDouble(x, y, 1, Math.atan2(fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1], fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0]));
-							}
-
+							double real = fArray[((wc-x) + (hc-y) * _w)*2 + 0];
+							double imag = fArray[((wc-x) + (hc-y) * _w)*2 + 1];
+							
+							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+							resultData[1][x + _w*y] = Math.atan2(imag, real);
 						}
-						for(int x = (wc+1); x < _w; x++)
+						for(int y = hc+1; y < _h; y++)
 						{
-							for(int y = 0; y < (hc+1); y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0], 2)+Math.pow(fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1], 2)));
-								resultArray.setDataAsDouble(x, y, 1, Math.atan2(fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1], fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0]));
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0], 2)+Math.pow(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1], 2)));
-								resultArray.setDataAsDouble(x, y, 1, Math.atan2(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1], fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0]));
-							}
+							double real = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
+							double imag = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
+							
+							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+							resultData[1][x + _w*y] = Math.atan2(imag, real);
 						}
-					}					
-					else //Real/Imaginary Pair
-					{
-						for(int x = 0; x < (wc+1); x++)
-						{
-							for(int y = 0; y < (hc+1); y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, fArray[((wc-x) + (hc-y) * _w)*2 + 0]);
-								resultArray.setDataAsDouble(x, y, 1, fArray[((wc-x) + (hc-y) * _w)*2 + 1]);
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0]);
-								resultArray.setDataAsDouble(x, y, 1, fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1]);
-							}
-
-						}
-						for(int x = (wc+1); x < _w; x++)
-						{
-							for(int y = 0; y < (hc+1); y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0]);
-								resultArray.setDataAsDouble(x, y, 1, fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1]);
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultArray.setDataAsDouble(x, y, 0, fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0]);
-								resultArray.setDataAsDouble(x, y, 1, fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1]);
-							}
-						}						
 
 					}
-
-				}finally{
-					resultArray.endUpdate();
+					for(int x = (wc+1); x < _w; x++)
+					{
+						for(int y = 0; y < (hc+1); y++)
+						{
+							double real = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
+							double imag = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
+							
+							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+							resultData[1][x + _w*y] = Math.atan2(imag, real);
+						}
+						for(int y = hc+1; y < _h; y++)
+						{
+							double real = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
+							double imag = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
+							
+							resultData[0][x + _w*y] = Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+							resultData[1][x + _w*y] = Math.atan2(imag, real);
+						}
+					}
+				}					
+				else //Real/Imaginary Pair
+				{
+					for(int x = 0; x < (wc+1); x++)
+					{
+						for(int y = 0; y < (hc+1); y++)
+						{
+							resultData[0][x + _w*y] = fArray[((wc-x) + (hc-y) * _w)*2 + 0];
+							resultData[1][x + _w*y] = fArray[((wc-x) + (hc-y) * _w)*2 + 1];
+						}
+						for(int y = hc+1; y < _h; y++)
+						{
+							resultData[0][x + _w*y] = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
+							resultData[1][x + _w*y] = fArray[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
+						}
+					}
+					for(int x = (wc+1); x < _w; x++)
+					{
+						for(int y = 0; y < (hc+1); y++)
+						{
+							resultData[0][x + _w*y] = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
+							resultData[1][x + _w*y] = fArray[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
+						}
+						for(int y = hc+1; y < _h; y++)
+						{
+							resultData[0][x + _w*y] = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
+							resultData[1][x + _w*y] = fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
+						}
+					}						
 				}
 
+				resultArray.dataChanged();
 				fSequence.setImage(0, k, resultArray);
 			}
-
 		}
-
 
 		addSequence(fSequence);
 
