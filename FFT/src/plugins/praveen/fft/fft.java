@@ -244,13 +244,13 @@ public class fft extends EzPlug {
 		return fSequence;
 	}
 	
-	interface Assign2DFunction {
+	interface AssignFunction2D {
 		void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function);
 	}
 	
 	// function that walks the 2D FFT from JTransforms and fills the sequence data array
 	// this is the version that does not swap the quadrants
-	Assign2DFunction directAssign = new Assign2DFunction()
+	AssignFunction2D directAssign = new AssignFunction2D()
 	{
 		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function) {
 			for (int i = 0; i < in.length/2; i++)
@@ -266,7 +266,7 @@ public class fft extends EzPlug {
 	
 	// function that walks the 2D FFT from JTransforms and fills the sequence data array
 	// this is the version that swaps the quadrants
-	Assign2DFunction swapAssign = new Assign2DFunction() {
+	AssignFunction2D swapAssign = new AssignFunction2D() {
 		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function)
 		{
 			int wc = (int) Math.ceil(_w/2);
@@ -346,7 +346,7 @@ public class fft extends EzPlug {
 		}
 		
 		
-		Assign2DFunction assignFunction = null;
+		AssignFunction2D assignFunction = null;
 		if(swap == "No") //No Quadrant swapping
 		{
 			assignFunction = directAssign;
