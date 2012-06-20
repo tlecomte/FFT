@@ -36,12 +36,43 @@ public class fft extends EzPlug {
 			FFT_3D(sequence, swap.getValue(), display.getValue());
 		//MessageDialog.showDialog("FFT3D not implemented yet !");	
 	}
+	
+	interface ApplyFunction {
+		double apply0(double real, double imag);
+		double apply1(double real, double imag);
+	}
+	
+	ApplyFunction realImagApplyFunction = new ApplyFunction()
+	{
+		public double apply0(double real, double imag)
+		{
+			return real;
+		}
+		public double apply1(double real, double imag)
+		{
+			return imag;
+		}
+	};
+	
+	ApplyFunction magnitudeAngleApplyFunction = new ApplyFunction()
+	{
+		public double apply0(double real, double imag)
+		{
+			return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
+		}
+		public double apply1(double real, double imag)
+		{
+			return Math.atan2(imag, real);
+		}
+	};
 
-	interface Assign3DFunction {
+	interface AssignFunction3D {
 		void assign(double[] in, double[][][] out, int _w, int _h, int _z, ApplyFunction function);
 	}
 	
-	Assign3DFunction directAssign3D = new Assign3DFunction()
+	// function that walks the 3D FFT from JTransforms and fills the sequence data array
+	// this is the version that does not swap the quadrants
+	AssignFunction3D directAssign3D = new AssignFunction3D()
 	{
 		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, ApplyFunction function) {
 			for(int k = 0; k < _z; k++)
@@ -59,8 +90,10 @@ public class fft extends EzPlug {
 			}
 		}	
 	};
-	
-	Assign3DFunction swapAssign3D = new Assign3DFunction()
+
+	// function that walks the 3D FFT from JTransforms and fills the sequence data array
+	// this is the version that swaps the quadrants
+	AssignFunction3D swapAssign3D = new AssignFunction3D()
 	{
 		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, ApplyFunction function) {
 			int wc = (int) Math.ceil(_w/2);
@@ -193,7 +226,7 @@ public class fft extends EzPlug {
 			applyFunction = realImagApplyFunction;
 		}
 		
-		Assign3DFunction assignFunction = null;
+		AssignFunction3D assignFunction = null;
 		if(swap == "No")  // No Quadrant swapping. Leave as it is.
 		{
 			assignFunction = directAssign3D;
@@ -211,39 +244,12 @@ public class fft extends EzPlug {
 		return fSequence;
 	}
 	
-	interface ApplyFunction {
-		double apply0(double real, double imag);
-		double apply1(double real, double imag);
-	}
-	
-	ApplyFunction realImagApplyFunction = new ApplyFunction()
-	{
-		public double apply0(double real, double imag)
-		{
-			return real;
-		}
-		public double apply1(double real, double imag)
-		{
-			return imag;
-		}
-	};
-	
-	ApplyFunction magnitudeAngleApplyFunction = new ApplyFunction()
-	{
-		public double apply0(double real, double imag)
-		{
-			return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-		}
-		public double apply1(double real, double imag)
-		{
-			return Math.atan2(imag, real);
-		}
-	};
-	
 	interface Assign2DFunction {
 		void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function);
 	}
 	
+	// function that walks the 2D FFT from JTransforms and fills the sequence data array
+	// this is the version that does not swap the quadrants
 	Assign2DFunction directAssign = new Assign2DFunction()
 	{
 		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function) {
@@ -258,6 +264,8 @@ public class fft extends EzPlug {
 		}	
 	};
 	
+	// function that walks the 2D FFT from JTransforms and fills the sequence data array
+	// this is the version that swaps the quadrants
 	Assign2DFunction swapAssign = new Assign2DFunction() {
 		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function)
 		{
