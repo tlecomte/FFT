@@ -9,6 +9,7 @@ import icy.type.collection.array.Array1DUtil;
 import plugins.adufour.blocks.lang.Block;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.ezplug.EzPlug;
+import plugins.adufour.ezplug.EzVarBoolean;
 import plugins.adufour.ezplug.EzVarSequence;
 import plugins.adufour.ezplug.EzVarText;
 import plugins.adufour.vars.lang.VarSequence;
@@ -18,7 +19,7 @@ public class fft extends EzPlug implements Block {
 	EzVarSequence input = new EzVarSequence("Input");
 	EzVarText	ndims = new EzVarText("Type", new String[] { "2D", "3D" }, 0, false);
 	EzVarText	outputType = new EzVarText("Output as", new String[] {  "Magnitude/Phase Pair", "Real/Imaginary Pair" }, 0, false);
-	EzVarText	swap = new EzVarText("Swap Quadrants?", new String[] { "Yes", "No" }, 1, false);
+	EzVarBoolean	swap = new EzVarBoolean("Swap Quadrants?", false);
 	
 	VarSequence fSequenceVar = new VarSequence("FFT sequence", null);
 
@@ -217,7 +218,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	private Sequence FFT_3D(Sequence sequence, String swap, String outputType) {
+	private Sequence FFT_3D(Sequence sequence, boolean swap, String outputType) {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
 		int _z = sequence.getSizeZ();
@@ -263,7 +264,7 @@ public class fft extends EzPlug implements Block {
 		}
 		
 		AssignFunction3D assignFunction = null;
-		if(swap == "No")  // No Quadrant swapping. Leave as it is.
+		if(!swap)  // No Quadrant swapping. Leave as it is.
 		{
 			assignFunction = directAssign3D;
 		}
@@ -355,7 +356,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	private Sequence FFT_2D(Sequence sequence, String swap, String outputType) 
+	private Sequence FFT_2D(Sequence sequence, boolean swap, String outputType) 
 	{
 		Sequence fSequence = new Sequence();
 		fSequence.setName("Fourier Transform 2D");
@@ -383,7 +384,7 @@ public class fft extends EzPlug implements Block {
 		}
 		
 		AssignFunction2D assignFunction = null;
-		if(swap == "No") //No Quadrant swapping
+		if(!swap) //No Quadrant swapping
 		{
 			assignFunction = directAssign;
 		}
