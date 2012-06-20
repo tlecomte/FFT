@@ -17,7 +17,7 @@ import plugins.adufour.vars.lang.VarSequence;
 public class fft extends EzPlug implements Block {
 
 	enum FFTDims {
-		FFT_2D("2D"), FFT_3D("3D");
+		FFT_2D("2D (xy)"), FFT_3D("3D (xyz)");
 		private String stringValue;
 		FFTDims(String s) { stringValue = s; }
 		public String toString() { return stringValue; }
