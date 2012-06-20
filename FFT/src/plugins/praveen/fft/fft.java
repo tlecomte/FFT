@@ -34,7 +34,6 @@ public class fft extends EzPlug {
 			FFT_2D(sequence, swap.getValue(), display.getValue());	
 		else
 			FFT_3D(sequence, swap.getValue(), display.getValue());
-		//MessageDialog.showDialog("FFT3D not implemented yet !");	
 	}
 	
 	interface ApplyFunction {
