@@ -10,15 +10,29 @@ import plugins.adufour.blocks.lang.Block;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.ezplug.EzPlug;
 import plugins.adufour.ezplug.EzVarBoolean;
+import plugins.adufour.ezplug.EzVarEnum;
 import plugins.adufour.ezplug.EzVarSequence;
-import plugins.adufour.ezplug.EzVarText;
 import plugins.adufour.vars.lang.VarSequence;
 
 public class fft extends EzPlug implements Block {
 
+	enum FFTDims {
+		FFT_2D("2D"), FFT_3D("3D");
+		private String stringValue;
+		FFTDims(String s) { stringValue = s; }
+		public String toString() { return stringValue; }
+	}
+	
+	enum FFTOutputType {
+		MAGNITUDE_PHASE("Magnitude/Phase Pair"), REAL_IMAG("Real/Imaginary Pair");
+		private String stringValue;
+		FFTOutputType(String s) { stringValue = s; }
+		public String toString() { return stringValue; }
+	}
+	
 	EzVarSequence input = new EzVarSequence("Input");
-	EzVarText	ndims = new EzVarText("Type", new String[] { "2D", "3D" }, 0, false);
-	EzVarText	outputType = new EzVarText("Output as", new String[] {  "Magnitude/Phase Pair", "Real/Imaginary Pair" }, 0, false);
+	EzVarEnum<FFTDims> ndims =  new EzVarEnum<FFTDims>("Type", FFTDims.values(), 0);
+	EzVarEnum<FFTOutputType> outputType =  new EzVarEnum<FFTOutputType>("Output as", FFTOutputType.values(), 0);
 	EzVarBoolean	swap = new EzVarBoolean("Swap Quadrants?", false);
 	
 	VarSequence fSequenceVar = new VarSequence("FFT sequence", null);
@@ -27,8 +41,8 @@ public class fft extends EzPlug implements Block {
 	protected void initialize() {
 		super.addEzComponent(input);
 		super.addEzComponent(ndims);
+		super.addEzComponent(outputType);
 		super.addEzComponent(swap);
-		super.addEzComponent(outputType);		
 		super.setTimeDisplay(true);
 	}
 	
@@ -52,7 +66,7 @@ public class fft extends EzPlug implements Block {
 		Sequence sequence = input.getValue();
 		Sequence fSequence = null;
 
-		if(ndims.getValue()=="2D")		
+		if(ndims.getValue()==FFTDims.FFT_2D)		
 			fSequence = FFT_2D(sequence, swap.getValue(), outputType.getValue());	
 		else
 			fSequence = FFT_3D(sequence, swap.getValue(), outputType.getValue());
@@ -218,7 +232,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	private Sequence FFT_3D(Sequence sequence, boolean swap, String outputType) {
+	private Sequence FFT_3D(Sequence sequence, boolean swap, FFTOutputType outputType) {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
 		int _z = sequence.getSizeZ();
@@ -248,7 +262,7 @@ public class fft extends EzPlug implements Block {
 
 		ApplyFunction channel0ApplyFunction = null;
 		ApplyFunction channel1ApplyFunction = null;
-		if(outputType=="Magnitude/Phase Pair")
+		if(outputType == FFTOutputType.MAGNITUDE_PHASE)
 		{
 			channel0ApplyFunction = magnitudeApplyFunction;
 			channel1ApplyFunction = angleApplyFunction;
@@ -356,7 +370,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	private Sequence FFT_2D(Sequence sequence, boolean swap, String outputType) 
+	private Sequence FFT_2D(Sequence sequence, boolean swap, FFTOutputType outputType) 
 	{
 		Sequence fSequence = new Sequence();
 		fSequence.setName("Fourier Transform 2D");
@@ -368,7 +382,7 @@ public class fft extends EzPlug implements Block {
 		
 		ApplyFunction channel0Function = null;
 		ApplyFunction channel1Function = null;
-		if(outputType=="Magnitude/Phase Pair")
+		if(outputType == FFTOutputType.MAGNITUDE_PHASE)
 		{
 			channel0Function = magnitudeApplyFunction;
 			channel1Function = angleApplyFunction;
