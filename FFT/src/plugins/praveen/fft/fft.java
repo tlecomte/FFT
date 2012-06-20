@@ -17,7 +17,7 @@ public class fft extends EzPlug implements Block {
 
 	EzVarSequence input = new EzVarSequence("Input");
 	EzVarText	ndims = new EzVarText("Type", new String[] { "2D", "3D" }, 0, false);
-	EzVarText	display = new EzVarText("Display as", new String[] {  "Magnitude/Phase Pair", "Real/Imaginary Pair" }, 0, false);
+	EzVarText	outputType = new EzVarText("Output as", new String[] {  "Magnitude/Phase Pair", "Real/Imaginary Pair" }, 0, false);
 	EzVarText	swap = new EzVarText("Swap Quadrants?", new String[] { "Yes", "No" }, 1, false);
 	
 	VarSequence fSequenceVar = new VarSequence("FFT sequence", null);
@@ -27,7 +27,7 @@ public class fft extends EzPlug implements Block {
 		super.addEzComponent(input);
 		super.addEzComponent(ndims);
 		super.addEzComponent(swap);
-		super.addEzComponent(display);		
+		super.addEzComponent(outputType);		
 		super.setTimeDisplay(true);
 	}
 	
@@ -36,7 +36,7 @@ public class fft extends EzPlug implements Block {
 	public void declareInput(VarList inputMap) {
 		inputMap.add(input.getVariable());
 		inputMap.add(ndims.getVariable());
-		inputMap.add(display.getVariable());
+		inputMap.add(outputType.getVariable());
 		inputMap.add(swap.getVariable());
 	}
 
@@ -52,9 +52,9 @@ public class fft extends EzPlug implements Block {
 		Sequence fSequence = null;
 
 		if(ndims.getValue()=="2D")		
-			fSequence = FFT_2D(sequence, swap.getValue(), display.getValue());	
+			fSequence = FFT_2D(sequence, swap.getValue(), outputType.getValue());	
 		else
-			fSequence = FFT_3D(sequence, swap.getValue(), display.getValue());
+			fSequence = FFT_3D(sequence, swap.getValue(), outputType.getValue());
 		
 		if (!isHeadLess()) {
 			addSequence(fSequence);
@@ -217,7 +217,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	private Sequence FFT_3D(Sequence sequence, String swap, String display) {
+	private Sequence FFT_3D(Sequence sequence, String swap, String outputType) {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
 		int _z = sequence.getSizeZ();
@@ -247,7 +247,7 @@ public class fft extends EzPlug implements Block {
 
 		ApplyFunction channel0ApplyFunction = null;
 		ApplyFunction channel1ApplyFunction = null;
-		if(display=="Magnitude/Phase Pair")
+		if(outputType=="Magnitude/Phase Pair")
 		{
 			channel0ApplyFunction = magnitudeApplyFunction;
 			channel1ApplyFunction = angleApplyFunction;
@@ -355,7 +355,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	private Sequence FFT_2D(Sequence sequence, String swap, String display) 
+	private Sequence FFT_2D(Sequence sequence, String swap, String outputType) 
 	{
 		Sequence fSequence = new Sequence();
 		fSequence.setName("Fourier Transform 2D");
@@ -367,7 +367,7 @@ public class fft extends EzPlug implements Block {
 		
 		ApplyFunction channel0Function = null;
 		ApplyFunction channel1Function = null;
-		if(display=="Magnitude/Phase Pair")
+		if(outputType=="Magnitude/Phase Pair")
 		{
 			channel0Function = magnitudeApplyFunction;
 			channel1Function = angleApplyFunction;
