@@ -334,6 +334,27 @@ public class fft extends EzPlug {
 		}
 
 		final DoubleFFT_2D fft = new DoubleFFT_2D(_h, _w);
+		
+		ApplyFunction applyFunction = null;
+		if(display=="Magnitude/Phase Pair")
+		{
+			applyFunction = magnitudeAngleApplyFunction;
+		}
+		else // Real/Imaginary Pair
+		{
+			applyFunction = realImagApplyFunction;
+		}
+		
+		
+		Assign2DFunction assignFunction = null;
+		if(swap == "No") //No Quadrant swapping
+		{
+			assignFunction = directAssign;
+		}
+		else //Swap quadrants
+		{
+			assignFunction = swapAssign;
+		}
 
 		for(int k = 0; k < _z; k++)
 		{
@@ -347,28 +368,7 @@ public class fft extends EzPlug {
 
 			IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
 			double[][] resultData = resultArray.getDataXYCAsDouble();
-			
-			ApplyFunction applyFunction = null;
-			if(display=="Magnitude/Phase Pair")
-			{
-				applyFunction = magnitudeAngleApplyFunction;
-			}
-			else // Real/Imaginary Pair
-			{
-				applyFunction = realImagApplyFunction;
-			}
-			
-			
-			Assign2DFunction assignFunction = null;
-			if(swap == "No") //No Quadrant swapping
-			{
-				assignFunction = directAssign;
-			}
-			else //Swap quadrants
-			{
-				assignFunction = swapAssign;
-			}
-			
+					
 			assignFunction.assign(fArray, resultData, _w, _h, applyFunction);
 
 			resultArray.dataChanged();
