@@ -185,17 +185,6 @@ public class fft extends EzPlug {
 		Sequence fSequence = new Sequence();
 		fSequence.setName("Fourier Transform 3D");
 
-		if(display=="Magnitude/Phase Pair")
-		{
-			fSequence.setChannelName(0, "Magnitude");
-			fSequence.setChannelName(1, "Phase");
-		}
-		else // Real/Imaginary Pair
-		{
-			fSequence.setChannelName(0, "Real");
-			fSequence.setChannelName(1, "Imaginary");
-		}
-
 		// allocate the output sequence
 		for(int k = 0; k < _z; k++)
 		{	
@@ -219,10 +208,14 @@ public class fft extends EzPlug {
 		if(display=="Magnitude/Phase Pair")
 		{
 			applyFunction = magnitudeAngleApplyFunction;
+			fSequence.setChannelName(0, "Magnitude");
+			fSequence.setChannelName(1, "Phase");
 		}
 		else
 		{
 			applyFunction = realImagApplyFunction;
+			fSequence.setChannelName(0, "Real");
+			fSequence.setChannelName(1, "Imaginary");
 		}
 		
 		AssignFunction3D assignFunction = null;
@@ -320,17 +313,6 @@ public class fft extends EzPlug {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
 		int _z = sequence.getSizeZ();
-		
-		if(display=="Magnitude/Phase Pair")
-		{
-			fSequence.setChannelName(0, "Magnitude");
-			fSequence.setChannelName(1, "Phase");
-		}
-		else // Real/Imaginary Pair
-		{
-			fSequence.setChannelName(0, "Real");
-			fSequence.setChannelName(1, "Imaginary");
-		}
 
 		final DoubleFFT_2D fft = new DoubleFFT_2D(_h, _w);
 		
@@ -338,12 +320,15 @@ public class fft extends EzPlug {
 		if(display=="Magnitude/Phase Pair")
 		{
 			applyFunction = magnitudeAngleApplyFunction;
+			fSequence.setChannelName(0, "Magnitude");
+			fSequence.setChannelName(1, "Phase");
 		}
 		else // Real/Imaginary Pair
 		{
 			applyFunction = realImagApplyFunction;
+			fSequence.setChannelName(0, "Real");
+			fSequence.setChannelName(1, "Imaginary");
 		}
-		
 		
 		AssignFunction2D assignFunction = null;
 		if(swap == "No") //No Quadrant swapping
