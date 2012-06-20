@@ -6,16 +6,21 @@ import icy.image.IcyBufferedImage;
 import icy.sequence.Sequence;
 import icy.type.DataType;
 import icy.type.collection.array.Array1DUtil;
+import plugins.adufour.blocks.lang.Block;
+import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.ezplug.EzPlug;
 import plugins.adufour.ezplug.EzVarSequence;
 import plugins.adufour.ezplug.EzVarText;
+import plugins.adufour.vars.lang.VarSequence;
 
-public class fft extends EzPlug {
+public class fft extends EzPlug implements Block {
 
 	EzVarSequence input = new EzVarSequence("Input");
 	EzVarText	ndims = new EzVarText("Type", new String[] { "2D", "3D" }, 0, false);
 	EzVarText	display = new EzVarText("Display as", new String[] {  "Magnitude/Phase Pair", "Real/Imaginary Pair" }, 0, false);
 	EzVarText	swap = new EzVarText("Swap Quadrants?", new String[] { "Yes", "No" }, 1, false);
+	
+	VarSequence fSequenceVar = new VarSequence("FFT sequence", null);
 
 	@Override
 	protected void initialize() {
@@ -25,15 +30,33 @@ public class fft extends EzPlug {
 		super.addEzComponent(display);		
 		super.setTimeDisplay(true);
 	}
+	
+	// declare ourself to Blocks
+	@Override
+	public void declareInput(VarList inputMap) {
+		inputMap.add(input.getVariable());
+		inputMap.add(ndims.getVariable());
+		inputMap.add(display.getVariable());
+		inputMap.add(swap.getVariable());
+	}
+
+	// declare ourself to Blocks
+	@Override
+	public void declareOutput(VarList outputMap) {
+		outputMap.add(fSequenceVar);
+	}
 
 	@Override
 	protected void execute() {
 		Sequence sequence = input.getValue();
+		Sequence fSequence = null;
 
 		if(ndims.getValue()=="2D")		
-			FFT_2D(sequence, swap.getValue(), display.getValue());	
+			fSequence = FFT_2D(sequence, swap.getValue(), display.getValue());	
 		else
-			FFT_3D(sequence, swap.getValue(), display.getValue());
+			fSequence = FFT_3D(sequence, swap.getValue(), display.getValue());
+		
+		fSequenceVar.setValue(fSequence);
 	}
 	
 	interface ApplyFunction {
