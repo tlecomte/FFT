@@ -37,17 +37,118 @@ public class fft extends EzPlug {
 		//MessageDialog.showDialog("FFT3D not implemented yet !");	
 	}
 
-
+	interface Assign3DFunction {
+		void assign(double[] in, double[][][] out, int _w, int _h, int _z, ApplyFunction function);
+	}
+	
+	Assign3DFunction directAssign3D = new Assign3DFunction()
+	{
+		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, ApplyFunction function) {
+			for(int k = 0; k < _z; k++)
+			{			
+				for(int x = 0; x < _w; x++)
+				{
+					for(int y = 0; y < _h; y++)
+					{
+						double real = in[(x + (y * _w) + (k * _w * _h))*2 + 0];
+						double imag = in[(x + (y * _w) + (k * _w * _h))*2 + 1];					
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+				}
+			}
+		}	
+	};
+	
+	Assign3DFunction swapAssign3D = new Assign3DFunction()
+	{
+		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, ApplyFunction function) {
+			int wc = (int) Math.ceil(_w/2);
+			int hc = (int) Math.ceil(_h/2);
+			int zc = (int) Math.ceil(_z/2);
+			
+			for(int k = 0; k < zc+1; k++)
+			{			
+				for(int x = 0; x < wc+1; x++)
+				{
+					for(int y = 0; y < hc+1; y++)
+					{
+						double real = in[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0];
+						double imag = in[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+					for(int y = hc+1; y < _h; y++)
+					{
+						double real = in[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0];
+						double imag = in[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+				}
+				for(int x = wc+1; x < _w; x++)
+				{
+					for(int y = 0; y < hc+1; y++)
+					{
+						double real = in[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0];
+						double imag = in[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+					for(int y = hc+1; y < _h; y++)
+					{
+						double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0];
+						double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+				}
+			}
+			for(int k = zc+1; k < _z; k++)
+			{			
+				for(int x = 0; x < wc+1; x++)
+				{
+					for(int y = 0; y < hc+1; y++)
+					{
+						double real = in[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
+						double imag = in[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+					for(int y = hc+1; y < _h; y++)
+					{
+						double real = in[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
+						double imag = in[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+				}
+				for(int x = wc+1; x < _w; x++)
+				{
+					for(int y = 0; y < hc+1; y++)
+					{
+						double real = in[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
+						double imag = in[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+					for(int y = hc+1; y < _h; y++)
+					{
+						double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
+						double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
+						out[k][0][x + _w*y] = function.apply0(real, imag);
+						out[k][1][x + _w*y] = function.apply1(real, imag);
+					}
+				}
+			}
+		}
+	};
 
 	private Sequence FFT_3D(Sequence sequence, String swap, String display) {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
 		int _z = sequence.getSizeZ();
-		int wc = (int) Math.ceil(_w/2);
-		int hc = (int) Math.ceil(_h/2);
-		int zc = (int) Math.ceil(_z/2);
 
-		double[] fArray;
 		final DoubleFFT_3D fft = new DoubleFFT_3D(_z, _h, _w);
 		Sequence fSequence = new Sequence();
 		fSequence.setName("Fourier Transform 3D");
@@ -63,234 +164,49 @@ public class fft extends EzPlug {
 			fSequence.setChannelName(1, "Imaginary");
 		}
 
+		// allocate the output sequence
 		for(int k = 0; k < _z; k++)
 		{	
-			IcyBufferedImage resultMatrix = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);			
-			resultMatrix.setDataXY(0, Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), sequence.isSignedDataType()));//set buffered image to sequence 
-			fSequence.setImage(0, k, resultMatrix);			
-		}						
-		fArray = fSequence.getDataCopyCXYZAsDouble(0);
-		fft.complexForward(fArray);//Does only on half the data. To get the full transform use realForwardFull
+			IcyBufferedImage fImage = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
+			fSequence.setImage(0, k, fImage);			
+		}
 		
-		if(swap == "No")
-		{ //No Quadrant swapping. Leave as it is.
-			if(display=="Magnitude/Phase Pair")
-			{
-				for(int k = 0; k < _z; k++)
-				{			
-					IcyBufferedImage resultMatrix = fSequence.getImage(0, k);
+		double[] fArray = new double[_w*_h*_z*2];
+		// copy the data in fArray, with proper structure
+		for(int k = 0; k < _z; k++)
+		{
+			Array1DUtil.arrayToDoubleArray(sequence.getDataXY(0, k, 0), 0, fArray, k*_w*_h, _w*_h, sequence.isSignedDataType());
+		}
 
+		fft.realForwardFull(fArray);
+		
+		// direct reference to 3D byte array data [Z][C][XY] for specified t
+		double[][][] resultData = fSequence.getDataXYCZAsDouble(0);
 
-					resultMatrix.beginUpdate();
-					try
-					{
-						for(int x = 0; x < _w; x++)
-						{
-							for(int y = 0; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[(x + (y * _w) + (k * _w * _h))*2 + 0], 2)+Math.pow(fArray[(x + (y * _w) + (k * _w * _h))*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[(x + (y * _w) + (k * _w * _h))*2 + 1], fArray[(x + (y * _w) + (k * _w * _h))*2 + 0]));
-							}
-						}
-					}
-					finally
-					{
-						resultMatrix.endUpdate();
-					}
-				}
-			}
-			else
-			{
-				for(int k = 0; k < _z; k++)
-				{			
-					IcyBufferedImage resultMatrix = fSequence.getImage(0, k);
-					resultMatrix.beginUpdate();
-					try
-					{
-						for(int x = 0; x < _w; x++)
-						{
-							for(int y = 0; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[(x + (y * _w) + (k * _w * _h))*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[(x + (y * _w) + (k * _w * _h))*2 + 1]);
-							}
-						}
-					}
-					finally
-					{
-						resultMatrix.endUpdate();
-					}
-				}
-			}
+		ApplyFunction applyFunction = null;
+		if(display=="Magnitude/Phase Pair")
+		{
+			applyFunction = magnitudeAngleApplyFunction;
 		}
 		else
-		{//Swap Quadrants
-			if(display=="Magnitude/Phase Pair")
-			{
-				for(int k = 0; k < zc+1; k++)
-				{			
-					IcyBufferedImage resultMatrix = fSequence.getImage(0, k);
-
-
-					resultMatrix.beginUpdate();
-					try
-					{
-						for(int x = 0; x < wc+1; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1], fArray[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0]));
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1], fArray[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0]));
-							}
-						}
-						for(int x = wc+1; x < _w; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1], fArray[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0]));
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1], fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0]));
-							}
-						}
-					}
-
-					finally
-					{
-						resultMatrix.endUpdate();
-					}
-				}
-				for(int k = zc+1; k < _z; k++)
-				{			
-					IcyBufferedImage resultMatrix = fSequence.getImage(0, k);
-
-
-					resultMatrix.beginUpdate();
-					try
-					{
-						for(int x = 0; x < wc+1; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], fArray[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]));
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], fArray[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]));
-							}
-						}
-						for(int x = wc+1; x < _w; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], fArray[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]));
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, Math.sqrt(Math.pow(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0], 2)+Math.pow(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], 2)));
-								resultMatrix.setDataAsDouble(x, y, 1, Math.atan2(fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1], fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]));
-							}
-						}
-					}
-					finally
-					{
-						resultMatrix.endUpdate();
-					}
-				}
-			}
-			else
-			{
-				for(int k = 0; k < zc+1; k++)
-				{			
-					IcyBufferedImage resultMatrix = fSequence.getImage(0, k);
-					resultMatrix.beginUpdate();
-					try
-					{
-						for(int x = 0; x < wc+1; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1]);
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1]);
-							}
-						}
-						for(int x = wc+1; x < _w; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1]);
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1]);
-							}
-						}
-					}
-					finally
-					{
-						resultMatrix.endUpdate();
-					}
-				}
-				for(int k = zc+1; k < _z; k++)
-				{			
-					IcyBufferedImage resultMatrix = fSequence.getImage(0, k);
-					resultMatrix.beginUpdate();
-					try
-					{
-						for(int x = 0; x < wc+1; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1]);
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1]);
-							}
-						}
-						for(int x = wc+1; x < _w; x++)
-						{
-							for(int y = 0; y < hc+1; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1]);
-							}
-							for(int y = hc+1; y < _h; y++)
-							{
-								resultMatrix.setDataAsDouble(x, y, 0, fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0]);
-								resultMatrix.setDataAsDouble(x, y, 1, fArray[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1]);
-							}
-						}
-					}
-					finally
-					{
-						resultMatrix.endUpdate();
-					}
-				}
-
-			}
-
+		{
+			applyFunction = realImagApplyFunction;
 		}
+		
+		Assign3DFunction assignFunction = null;
+		if(swap == "No")  // No Quadrant swapping. Leave as it is.
+		{
+			assignFunction = directAssign3D;
+		}
+		else
+		{
+			assignFunction = swapAssign3D; // Swap Quadrants
+		}
+		
+		assignFunction.assign(fArray, resultData, _w, _h, _z, applyFunction);
+
+		fSequence.dataChanged();
+		
 		addSequence(fSequence);
 		return fSequence;
 	}
@@ -300,7 +216,7 @@ public class fft extends EzPlug {
 		double apply1(double real, double imag);
 	}
 	
-	ApplyFunction realImageApplyFunction = new ApplyFunction()
+	ApplyFunction realImagApplyFunction = new ApplyFunction()
 	{
 		public double apply0(double real, double imag)
 		{
@@ -324,11 +240,11 @@ public class fft extends EzPlug {
 		}
 	};
 	
-	interface AssignFunction {
+	interface Assign2DFunction {
 		void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function);
 	}
 	
-	AssignFunction directAssign = new AssignFunction()
+	Assign2DFunction directAssign = new Assign2DFunction()
 	{
 		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function) {
 			for (int i = 0; i < in.length/2; i++)
@@ -342,7 +258,7 @@ public class fft extends EzPlug {
 		}	
 	};
 	
-	AssignFunction swapAssign = new AssignFunction() {
+	Assign2DFunction swapAssign = new Assign2DFunction() {
 		public void assign(double[] in, double[][] out, int _w, int _h, ApplyFunction function)
 		{
 			int wc = (int) Math.ceil(_w/2);
@@ -431,11 +347,11 @@ public class fft extends EzPlug {
 			}
 			else // Real/Imaginary Pair
 			{
-				applyFunction = realImageApplyFunction;
+				applyFunction = realImagApplyFunction;
 			}
 			
 			
-			AssignFunction assignFunction = null;
+			Assign2DFunction assignFunction = null;
 			if(swap == "No") //No Quadrant swapping
 			{
 				assignFunction = directAssign;
