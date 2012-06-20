@@ -56,6 +56,10 @@ public class fft extends EzPlug implements Block {
 		else
 			fSequence = FFT_3D(sequence, swap.getValue(), display.getValue());
 		
+		if (!isHeadLess()) {
+			addSequence(fSequence);
+		}
+		
 		fSequenceVar.setValue(fSequence);
 	}
 	
@@ -272,7 +276,6 @@ public class fft extends EzPlug implements Block {
 
 		fSequence.dataChanged();
 		
-		addSequence(fSequence);
 		return fSequence;
 	}
 	
@@ -407,8 +410,6 @@ public class fft extends EzPlug implements Block {
 			resultArray.dataChanged();
 			fSequence.setImage(0, k, resultArray);
 		}
-
-		addSequence(fSequence);
 
 		return fSequence;
 	}
