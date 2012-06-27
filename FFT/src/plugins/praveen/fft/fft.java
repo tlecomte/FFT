@@ -116,18 +116,16 @@ public class fft extends EzPlug implements Block {
 
 	
 	interface AssignFunction3D {
-		void assign(double[] in, double[][][] out, int _w, int _h, int _z,
-				ApplyFunction channel0Function,
-				ApplyFunction channel1Function);
+		void assign(double[] in, double[][][] out, int _w, int _h, int _z, int c,
+				ApplyFunction function);
 	}
 	
 	// function that walks the 3D FFT from JTransforms and fills the sequence data array
 	// this is the version that does not swap the quadrants
 	AssignFunction3D directAssign3D = new AssignFunction3D()
 	{
-		public void assign(double[] in, double[][][] out, int _w, int _h, int _z,
-				ApplyFunction channel0Function,
-				ApplyFunction channel1Function) {
+		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, int c,
+				ApplyFunction function) {
 			for(int k = 0; k < _z; k++)
 			{			
 				for(int x = 0; x < _w; x++)
@@ -136,8 +134,7 @@ public class fft extends EzPlug implements Block {
 					{
 						double real = in[(x + (y * _w) + (k * _w * _h))*2 + 0];
 						double imag = in[(x + (y * _w) + (k * _w * _h))*2 + 1];					
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 				}
 			}
@@ -148,9 +145,8 @@ public class fft extends EzPlug implements Block {
 	// this is the version that swaps the quadrants
 	AssignFunction3D swapAssign3D = new AssignFunction3D()
 	{
-		public void assign(double[] in, double[][][] out, int _w, int _h, int _z,
-				ApplyFunction channel0Function,
-				ApplyFunction channel1Function) {
+		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, int c,
+				ApplyFunction function) {
 			int wc = (int) Math.ceil(_w/2);
 			int hc = (int) Math.ceil(_h/2);
 			int zc = (int) Math.ceil(_z/2);
@@ -163,15 +159,13 @@ public class fft extends EzPlug implements Block {
 					{
 						double real = in[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0];
 						double imag = in[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 					for(int y = hc+1; y < _h; y++)
 					{
 						double real = in[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0];
 						double imag = in[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 				}
 				for(int x = wc+1; x < _w; x++)
@@ -180,15 +174,13 @@ public class fft extends EzPlug implements Block {
 					{
 						double real = in[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0];
 						double imag = in[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 					for(int y = hc+1; y < _h; y++)
 					{
 						double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0];
 						double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 				}
 			}
@@ -200,15 +192,13 @@ public class fft extends EzPlug implements Block {
 					{
 						double real = in[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
 						double imag = in[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 					for(int y = hc+1; y < _h; y++)
 					{
 						double real = in[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
 						double imag = in[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 				}
 				for(int x = wc+1; x < _w; x++)
@@ -217,15 +207,13 @@ public class fft extends EzPlug implements Block {
 					{
 						double real = in[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
 						double imag = in[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 					for(int y = hc+1; y < _h; y++)
 					{
 						double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
 						double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][0][x + _w*y] = channel0Function.apply(real, imag);
-						out[k][1][x + _w*y] = channel1Function.apply(real, imag);
+						out[k][c][x + _w*y] = function.apply(real, imag);
 					}
 				}
 			}
@@ -287,7 +275,8 @@ public class fft extends EzPlug implements Block {
 			assignFunction = swapAssign3D; // Swap Quadrants
 		}
 		
-		assignFunction.assign(fArray, resultData, _w, _h, _z, channel0ApplyFunction, channel1ApplyFunction);
+		assignFunction.assign(fArray, resultData, _w, _h, _z, 0, channel0ApplyFunction);
+		assignFunction.assign(fArray, resultData, _w, _h, _z, 1, channel1ApplyFunction);
 
 		fSequence.dataChanged();
 		
@@ -295,25 +284,22 @@ public class fft extends EzPlug implements Block {
 	}
 	
 	interface AssignFunction2D {
-		void assign(double[] in, double[][] out, int _w, int _h,
-				ApplyFunction channel0Function,
-				ApplyFunction channel1Function);
+		void assign(double[] in, double[] out, int _w, int _h,
+				ApplyFunction Function);
 	}
 	
 	// function that walks the 2D FFT from JTransforms and fills the sequence data array
 	// this is the version that does not swap the quadrants
 	AssignFunction2D directAssign = new AssignFunction2D()
 	{
-		public void assign(double[] in, double[][] out, int _w, int _h,
-				ApplyFunction channel0Function,
-				ApplyFunction channel1Function) {
+		public void assign(double[] in, double[] out, int _w, int _h,
+				ApplyFunction function) {
 			for (int i = 0; i < in.length/2; i++)
 			{
 				double real = in[2*i];
 				double imag = in[2*i + 1];
 				
-				out[0][i] = channel0Function.apply(real, imag);
-				out[1][i] = channel1Function.apply(real, imag);
+				out[i] = function.apply(real, imag);
 			}	
 		}	
 	};
@@ -321,9 +307,8 @@ public class fft extends EzPlug implements Block {
 	// function that walks the 2D FFT from JTransforms and fills the sequence data array
 	// this is the version that swaps the quadrants
 	AssignFunction2D swapAssign = new AssignFunction2D() {
-		public void assign(double[] in, double[][] out, int _w, int _h,
-				ApplyFunction channel0Function,
-				ApplyFunction channel1Function)
+		public void assign(double[] in, double[] out, int _w, int _h,
+				ApplyFunction function)
 		{
 			int wc = (int) Math.ceil(_w/2);
 			int hc = (int) Math.ceil(_h/2);
@@ -335,16 +320,14 @@ public class fft extends EzPlug implements Block {
 					double real = in[((wc-x) + (hc-y) * _w)*2 + 0];
 					double imag = in[((wc-x) + (hc-y) * _w)*2 + 1];
 					
-					out[0][x + _w*y] = channel0Function.apply(real, imag);
-					out[1][x + _w*y] = channel1Function.apply(real, imag);
+					out[x + _w*y] = function.apply(real, imag);
 				}
 				for(int y = hc+1; y < _h; y++)
 				{
 					double real = in[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
 					double imag = in[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
 					
-					out[0][x + _w*y] = channel0Function.apply(real, imag);
-					out[1][x + _w*y] = channel1Function.apply(real, imag);
+					out[x + _w*y] = function.apply(real, imag);
 				}
 		
 			}
@@ -355,16 +338,14 @@ public class fft extends EzPlug implements Block {
 					double real = in[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
 					double imag = in[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
 					
-					out[0][x + _w*y] = channel0Function.apply(real, imag);
-					out[1][x + _w*y] = channel1Function.apply(real, imag);
+					out[x + _w*y] = function.apply(real, imag);
 				}
 				for(int y = hc+1; y < _h; y++)
 				{
 					double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
 					double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
 					
-					out[0][x + _w*y] = channel0Function.apply(real, imag);
-					out[1][x + _w*y] = channel1Function.apply(real, imag);
+					out[x + _w*y] = function.apply(real, imag);
 				}
 			}
 		}
@@ -420,7 +401,8 @@ public class fft extends EzPlug implements Block {
 			IcyBufferedImage resultArray = new IcyBufferedImage(_w, _h, 2, DataType.DOUBLE);
 			double[][] resultData = resultArray.getDataXYCAsDouble();
 					
-			assignFunction.assign(fArray, resultData, _w, _h, channel0Function, channel1Function);
+			assignFunction.assign(fArray, resultData[0], _w, _h, channel0Function);
+			assignFunction.assign(fArray, resultData[1], _w, _h, channel1Function);
 
 			resultArray.dataChanged();
 			fSequence.setImage(0, k, resultArray);
