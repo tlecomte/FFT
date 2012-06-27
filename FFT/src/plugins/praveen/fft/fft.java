@@ -114,112 +114,6 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	
-	interface AssignFunction3D {
-		void assign(double[] in, double[][][] out, int _w, int _h, int _z, int c,
-				ApplyFunction function);
-	}
-	
-	// function that walks the 3D FFT from JTransforms and fills the sequence data array
-	// this is the version that does not swap the quadrants
-	AssignFunction3D directAssign3D = new AssignFunction3D()
-	{
-		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, int c,
-				ApplyFunction function) {
-			for(int k = 0; k < _z; k++)
-			{			
-				for(int x = 0; x < _w; x++)
-				{
-					for(int y = 0; y < _h; y++)
-					{
-						double real = in[(x + (y * _w) + (k * _w * _h))*2 + 0];
-						double imag = in[(x + (y * _w) + (k * _w * _h))*2 + 1];					
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-				}
-			}
-		}	
-	};
-
-	// function that walks the 3D FFT from JTransforms and fills the sequence data array
-	// this is the version that swaps the quadrants
-	AssignFunction3D swapAssign3D = new AssignFunction3D()
-	{
-		public void assign(double[] in, double[][][] out, int _w, int _h, int _z, int c,
-				ApplyFunction function) {
-			int wc = (int) Math.ceil(_w/2);
-			int hc = (int) Math.ceil(_h/2);
-			int zc = (int) Math.ceil(_z/2);
-			
-			for(int k = 0; k < zc+1; k++)
-			{			
-				for(int x = 0; x < wc+1; x++)
-				{
-					for(int y = 0; y < hc+1; y++)
-					{
-						double real = in[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0];
-						double imag = in[((wc-x) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-					for(int y = hc+1; y < _h; y++)
-					{
-						double real = in[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0];
-						double imag = in[((wc-x) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-				}
-				for(int x = wc+1; x < _w; x++)
-				{
-					for(int y = 0; y < hc+1; y++)
-					{
-						double real = in[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 0];
-						double imag = in[((_w+(wc-x)) + (hc-y) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-					for(int y = hc+1; y < _h; y++)
-					{
-						double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 0];
-						double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (zc-k) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-				}
-			}
-			for(int k = zc+1; k < _z; k++)
-			{			
-				for(int x = 0; x < wc+1; x++)
-				{
-					for(int y = 0; y < hc+1; y++)
-					{
-						double real = in[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
-						double imag = in[((wc-x) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-					for(int y = hc+1; y < _h; y++)
-					{
-						double real = in[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
-						double imag = in[((wc-x) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-				}
-				for(int x = wc+1; x < _w; x++)
-				{
-					for(int y = 0; y < hc+1; y++)
-					{
-						double real = in[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
-						double imag = in[((_w+(wc-x)) + (hc-y) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-					for(int y = hc+1; y < _h; y++)
-					{
-						double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 0];
-						double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w + (_z+(zc-k)) * _w * _h)*2 + 1];
-						out[k][c][x + _w*y] = function.apply(real, imag);
-					}
-				}
-			}
-		}
-	};
-
 	private Sequence FFT_3D(Sequence sequence, boolean swap, FFTOutputType outputType) {
 		int _w = sequence.getSizeX();
 		int _h = sequence.getSizeY();
@@ -268,11 +162,11 @@ public class fft extends EzPlug implements Block {
 		AssignFunction3D assignFunction = null;
 		if(!swap)  // No Quadrant swapping. Leave as it is.
 		{
-			assignFunction = directAssign3D;
+			assignFunction = new DirectAssign3D();
 		}
 		else
 		{
-			assignFunction = swapAssign3D; // Swap Quadrants
+			assignFunction = new SwapAssign3D(); // Swap Quadrants
 		}
 		
 		assignFunction.assign(fArray, resultData, _w, _h, _z, 0, channel0ApplyFunction);
@@ -282,74 +176,6 @@ public class fft extends EzPlug implements Block {
 		
 		return fSequence;
 	}
-	
-	interface AssignFunction2D {
-		void assign(double[] in, double[] out, int _w, int _h,
-				ApplyFunction Function);
-	}
-	
-	// function that walks the 2D FFT from JTransforms and fills the sequence data array
-	// this is the version that does not swap the quadrants
-	AssignFunction2D directAssign = new AssignFunction2D()
-	{
-		public void assign(double[] in, double[] out, int _w, int _h,
-				ApplyFunction function) {
-			for (int i = 0; i < in.length/2; i++)
-			{
-				double real = in[2*i];
-				double imag = in[2*i + 1];
-				
-				out[i] = function.apply(real, imag);
-			}	
-		}	
-	};
-	
-	// function that walks the 2D FFT from JTransforms and fills the sequence data array
-	// this is the version that swaps the quadrants
-	AssignFunction2D swapAssign = new AssignFunction2D() {
-		public void assign(double[] in, double[] out, int _w, int _h,
-				ApplyFunction function)
-		{
-			int wc = (int) Math.ceil(_w/2);
-			int hc = (int) Math.ceil(_h/2);
-			
-			for(int x = 0; x < (wc+1); x++)
-			{
-				for(int y = 0; y < (hc+1); y++)
-				{
-					double real = in[((wc-x) + (hc-y) * _w)*2 + 0];
-					double imag = in[((wc-x) + (hc-y) * _w)*2 + 1];
-					
-					out[x + _w*y] = function.apply(real, imag);
-				}
-				for(int y = hc+1; y < _h; y++)
-				{
-					double real = in[((wc-x) + (_h+(hc-y)) * _w)*2 + 0];
-					double imag = in[((wc-x) + (_h+(hc-y)) * _w)*2 + 1];
-					
-					out[x + _w*y] = function.apply(real, imag);
-				}
-		
-			}
-			for(int x = (wc+1); x < _w; x++)
-			{
-				for(int y = 0; y < (hc+1); y++)
-				{
-					double real = in[((_w+(wc-x)) + (hc-y) * _w)*2 + 0];
-					double imag = in[((_w+(wc-x)) + (hc-y) * _w)*2 + 1];
-					
-					out[x + _w*y] = function.apply(real, imag);
-				}
-				for(int y = hc+1; y < _h; y++)
-				{
-					double real = in[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 0];
-					double imag = in[((_w+(wc-x)) + (_h+(hc-y)) * _w)*2 + 1];
-					
-					out[x + _w*y] = function.apply(real, imag);
-				}
-			}
-		}
-	};
 
 	private Sequence FFT_2D(Sequence sequence, boolean swap, FFTOutputType outputType) 
 	{
@@ -381,11 +207,11 @@ public class fft extends EzPlug implements Block {
 		AssignFunction2D assignFunction = null;
 		if(!swap) //No Quadrant swapping
 		{
-			assignFunction = directAssign;
+			assignFunction = new DirectAssign2D();
 		}
 		else //Swap quadrants
 		{
-			assignFunction = swapAssign;
+			assignFunction = new SwapAssign2D();
 		}
 
 		for(int k = 0; k < _z; k++)
