@@ -159,11 +159,11 @@ public class fft extends EzPlug implements Block {
 		AssignFunction3D assignFunction = null;
 		if(!swap)  // No Quadrant swapping. Leave as it is.
 		{
-			assignFunction = new DirectAssign3D();
+			assignFunction = new AssignFunctions.DirectAssign3D();
 		}
 		else
 		{
-			assignFunction = new SwapAssign3D(); // Swap Quadrants
+			assignFunction = new AssignFunctions.SwapAssign3D(); // Swap Quadrants
 		}
 		
 		assignFunction.assign(fArray, resultData, _w, _h, _z, 0, channel0ApplyFunction);
@@ -204,11 +204,11 @@ public class fft extends EzPlug implements Block {
 		AssignFunction2D assignFunction = null;
 		if(!swap) //No Quadrant swapping
 		{
-			assignFunction = new DirectAssign2D();
+			assignFunction = new AssignFunctions.DirectAssign2D();
 		}
 		else //Swap quadrants
 		{
-			assignFunction = new SwapAssign2D();
+			assignFunction = new AssignFunctions.SwapAssign2D();
 		}
 
 		for(int k = 0; k < _z; k++)
