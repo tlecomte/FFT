@@ -78,38 +78,6 @@ public class fft extends EzPlug implements Block {
 		
 		fSequenceVar.setValue(fSequence);
 	}
-	
-	DoubleDoubleFunction realApplyFunction = new DoubleDoubleFunction()
-	{
-		public double apply(double real, double imag)
-		{
-			return real;
-		}
-	};
-	
-	DoubleDoubleFunction imagApplyFunction = new DoubleDoubleFunction()
-	{
-		public double apply(double real, double imag)
-		{
-			return imag;
-		}
-	};
-	
-	DoubleDoubleFunction magnitudeApplyFunction = new DoubleDoubleFunction()
-	{
-		public double apply(double real, double imag)
-		{
-			return Math.sqrt(Math.pow(real, 2) + Math.pow(imag, 2));
-		}
-	};
-
-	DoubleDoubleFunction angleApplyFunction = new DoubleDoubleFunction()
-	{
-		public double apply(double real, double imag)
-		{
-			return Math.atan2(imag, real);
-		}
-	};
 
 	private Sequence FFT_3D(Sequence sequence, boolean swap, FFTOutputType outputType) {
 		int _w = sequence.getSizeX();
@@ -143,15 +111,15 @@ public class fft extends EzPlug implements Block {
 		DoubleDoubleFunction channel1ApplyFunction = null;
 		if(outputType == FFTOutputType.MAGNITUDE_PHASE)
 		{
-			channel0ApplyFunction = magnitudeApplyFunction;
-			channel1ApplyFunction = angleApplyFunction;
+			channel0ApplyFunction = new ComplexFunctions.Magnitude();
+			channel1ApplyFunction = new ComplexFunctions.Angle();
 			fSequence.setChannelName(0, "Magnitude");
 			fSequence.setChannelName(1, "Phase");
 		}
 		else
 		{
-			channel0ApplyFunction = realApplyFunction;
-			channel1ApplyFunction = imagApplyFunction;
+			channel0ApplyFunction = new ComplexFunctions.Real();
+			channel1ApplyFunction = new ComplexFunctions.Imag();
 			fSequence.setChannelName(0, "Real");
 			fSequence.setChannelName(1, "Imaginary");
 		}
@@ -188,15 +156,15 @@ public class fft extends EzPlug implements Block {
 		DoubleDoubleFunction channel1Function = null;
 		if(outputType == FFTOutputType.MAGNITUDE_PHASE)
 		{
-			channel0Function = magnitudeApplyFunction;
-			channel1Function = angleApplyFunction;
+			channel0Function = new ComplexFunctions.Magnitude();
+			channel1Function = new ComplexFunctions.Angle();
 			fSequence.setChannelName(0, "Magnitude");
 			fSequence.setChannelName(1, "Phase");
 		}
 		else // Real/Imaginary Pair
 		{
-			channel0Function = realApplyFunction;
-			channel1Function = imagApplyFunction;
+			channel0Function = new ComplexFunctions.Real();
+			channel1Function = new ComplexFunctions.Imag();
 			fSequence.setChannelName(0, "Real");
 			fSequence.setChannelName(1, "Imaginary");
 		}
