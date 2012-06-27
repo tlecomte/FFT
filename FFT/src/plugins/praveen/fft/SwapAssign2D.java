@@ -1,12 +1,12 @@
 package plugins.praveen.fft;
 
-import plugins.praveen.fft.fft.ApplyFunction;
+import cern.colt.function.tdouble.DoubleDoubleFunction;
 
 // function that walks the 2D FFT from JTransforms and fills the sequence data array
 // this is the version that swaps the quadrants
 public class SwapAssign2D implements AssignFunction2D{
 	public void assign(double[] in, double[] out, int _w, int _h,
-			ApplyFunction function)
+			DoubleDoubleFunction function)
 	{
 		int wc = (int) Math.ceil(_w/2);
 		int hc = (int) Math.ceil(_h/2);

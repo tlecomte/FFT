@@ -1,5 +1,6 @@
 package plugins.praveen.fft;
 
+import cern.colt.function.tdouble.DoubleDoubleFunction;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_2D;
 import edu.emory.mathcs.jtransforms.fft.DoubleFFT_3D;
 import icy.image.IcyBufferedImage;
@@ -78,11 +79,7 @@ public class fft extends EzPlug implements Block {
 		fSequenceVar.setValue(fSequence);
 	}
 	
-	interface ApplyFunction {
-		double apply(double real, double imag);
-	}
-	
-	ApplyFunction realApplyFunction = new ApplyFunction()
+	DoubleDoubleFunction realApplyFunction = new DoubleDoubleFunction()
 	{
 		public double apply(double real, double imag)
 		{
@@ -90,7 +87,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 	
-	ApplyFunction imagApplyFunction = new ApplyFunction()
+	DoubleDoubleFunction imagApplyFunction = new DoubleDoubleFunction()
 	{
 		public double apply(double real, double imag)
 		{
@@ -98,7 +95,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 	
-	ApplyFunction magnitudeApplyFunction = new ApplyFunction()
+	DoubleDoubleFunction magnitudeApplyFunction = new DoubleDoubleFunction()
 	{
 		public double apply(double real, double imag)
 		{
@@ -106,7 +103,7 @@ public class fft extends EzPlug implements Block {
 		}
 	};
 
-	ApplyFunction angleApplyFunction = new ApplyFunction()
+	DoubleDoubleFunction angleApplyFunction = new DoubleDoubleFunction()
 	{
 		public double apply(double real, double imag)
 		{
@@ -142,8 +139,8 @@ public class fft extends EzPlug implements Block {
 		// direct reference to 3D byte array data [Z][C][XY] for specified t
 		double[][][] resultData = fSequence.getDataXYCZAsDouble(0);
 
-		ApplyFunction channel0ApplyFunction = null;
-		ApplyFunction channel1ApplyFunction = null;
+		DoubleDoubleFunction channel0ApplyFunction = null;
+		DoubleDoubleFunction channel1ApplyFunction = null;
 		if(outputType == FFTOutputType.MAGNITUDE_PHASE)
 		{
 			channel0ApplyFunction = magnitudeApplyFunction;
@@ -187,8 +184,8 @@ public class fft extends EzPlug implements Block {
 
 		final DoubleFFT_2D fft = new DoubleFFT_2D(_h, _w);
 		
-		ApplyFunction channel0Function = null;
-		ApplyFunction channel1Function = null;
+		DoubleDoubleFunction channel0Function = null;
+		DoubleDoubleFunction channel1Function = null;
 		if(outputType == FFTOutputType.MAGNITUDE_PHASE)
 		{
 			channel0Function = magnitudeApplyFunction;
