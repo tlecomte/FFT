@@ -15,7 +15,7 @@ import plugins.adufour.ezplug.EzVarEnum;
 import plugins.adufour.ezplug.EzVarSequence;
 import plugins.adufour.vars.lang.VarSequence;
 
-public class fft extends EzPlug implements Block {
+public class FFT extends EzPlug implements Block {
 
 	enum FFTDims {
 		FFT_2D("2D (xy)"), FFT_3D("3D (xyz)");
