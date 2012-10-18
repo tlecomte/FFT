@@ -67,10 +67,22 @@ public class FFT extends EzPlug implements Block {
 		Sequence sequence = input.getValue();
 		Sequence fSequence = null;
 
-		if(ndims.getValue()==FFTDims.FFT_2D)		
-			fSequence = FFT_2D(sequence, swap.getValue(), outputType.getValue());	
+		if(ndims.getValue()==FFTDims.FFT_2D)
+		{		
+			fSequence = FFT_2D(sequence, swap.getValue(), outputType.getValue());
+		}
 		else
-			fSequence = FFT_3D(sequence, swap.getValue(), outputType.getValue());
+		{
+			if (sequence.getSizeZ() >= 2)
+			{
+				fSequence = FFT_3D(sequence, swap.getValue(), outputType.getValue());
+			}
+			else
+			{
+				System.err.println("Sequence depth is 1, so computing 2D FFT instead of 3D.");
+				fSequence = FFT_2D(sequence, swap.getValue(), outputType.getValue());
+			}
+		}
 		
 		if (!isHeadLess()) {
 			addSequence(fSequence);
