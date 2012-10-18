@@ -26,9 +26,9 @@ public class AssignFunctions {
 				DoubleDoubleFunction function) {
 			for(int z = 0; z < _z; z++)
 			{			
-				for(int x = 0; x < _w; x++)
+				for(int y = 0; y < _h; y++)
 				{
-					for(int y = 0; y < _h; y++)
+					for(int x = 0; x < _w; x++)
 					{
 						double real = in[(x + (y * _w) + (z * _w * _h))*2 + 0];
 						double imag = in[(x + (y * _w) + (z * _w * _h))*2 + 1];					
@@ -48,9 +48,9 @@ public class AssignFunctions {
 			int wc = (int) Math.ceil(_w/2);
 			int hc = (int) Math.ceil(_h/2);
 			
-			for(int x = 0; x < _w; x++)
+			for(int y = 0; y < _h; y++)
 			{
-				for(int y = 0; y < _h; y++)
+				for(int x = 0; x < _w; x++)
 				{
 					double real = in[(x + y*_w)*2 + 0];
 					double imag = in[(x + y*_w)*2 + 1];
@@ -75,9 +75,9 @@ public class AssignFunctions {
 
 			for(int z = 0; z < _z; z++)
 			{			
-				for(int x = 0; x < _w; x++)
+				for(int y = 0; y < _h; y++)
 				{
-					for(int y = 0; y < _h; y++)
+					for(int x = 0; x < _w; x++)
 					{
 						double real = in[(x + y * _w + z * _w * _h)*2 + 0];
 						double imag = in[(x + y * _w + z * _w * _h)*2 + 1];
